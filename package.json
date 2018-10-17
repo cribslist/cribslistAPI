@@ -1,0 +1,25 @@
+{
+  "name": "CribslistAPI",
+  "version": "0.3.0",
+  "description": "mock api for cribslist",
+  "engines": {
+    "node": "8.9.1"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.15.2"
+  },
+  "keywords": [
+    "node",
+    "heroku",
+    "express"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^1.18.4"
+  }
+}

@@ -1,0 +1,14 @@
+{
+    "id": 123,
+    "title": "Like New Crib",
+    "description": "Check out this brand new crib. Never been used and in great condition",
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": ["1-a.png", "1-b.png", "1-c.png"],
+    "thumbnail_url": "1-a.png"
+}
