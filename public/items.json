@@ -1,0 +1,226 @@
+[{
+    "id": 123,
+    "title": "Carseat for Sale",
+    "price": 20,
+    "description": "Check out this brand new car seat. Never been used and in great condition",
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/1-a.png",
+        "http://cribslist.herokuapp.com/images/1-b.png",
+        "http://cribslist.herokuapp.com/images/1-c.png"],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/1-a.png"
+},
+{
+    "id": 123,
+    "title": "Like New Crib",
+    "price": 50,
+    "description": "Check out this brand new crib. Never been used and in great condition",
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/2-a.png",
+        "http://cribslist.herokuapp.com/images/2-b.png",
+        "http://cribslist.herokuapp.com/images/2-c.png"],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/2-a.png"
+},
+{
+    "id": 123,
+    "title": "Child Seat Toy",
+    "description": "Check out this brand new Child Seat Toy. Never been used and in great condition",
+    "price": 25,
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/3.jpg"
+    ],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/3.jpg"
+},
+{
+    "id": 123,
+    "title": "Kids Rug",
+    "price": 10,
+    "description": "Check out this brand new rug. Never been used and in great condition",
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/4.jpg"],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/4.jpg"
+},
+{
+    "id": 123,
+    "title": "Racecar Bed! Like New",
+    "price": 75,
+    "description": "Check out this brand new crib. Never been used and in great condition",
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/5.jpg"],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/5.jpg"
+},
+{
+    "id": 123,
+    "title": "Like New Crib",
+    "price": 35,
+    "description": "Check out this brand new crib. Never been used and in great condition",
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/6.png",
+        "http://cribslist.herokuapp.com/images/1-b.png",
+        "http://cribslist.herokuapp.com/images/1-c.png"],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/6.png"
+},
+{
+    "id": 123,
+    "title": "Like Kitty Toy",
+    "price": 5,
+    "description": "Check out this brand kitty toy. Never been used and in great condition",
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/7.png"],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/7.png"
+},
+
+{
+    "id": 123,
+    "title": "Child push toy free",
+    "description": "Check out this brand push toy. Never been used and in great condition",
+    "price": 0,
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/8.jpg"],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/8.jpg"
+},
+
+{
+    "id": 123,
+    "title": "Preschool toy",
+    "description": "Check out this brand new toy. Never been used and in great condition",
+    "price": 11,
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/9.jpg"],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/9.jpg"
+},
+
+{
+    "id": 123,
+    "title": "Dr's Office Toy thing",
+    "price": 7,
+    "description": "Stole this from a doctors office. It probably has a lot of germs on it",
+    "price": 11,
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/10.png"],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/10.png"
+},
+
+{
+    "id": 123,
+    "title": "Horsey Toy",
+    "price": 10,
+    "description": "Your kid will love this thing. Just look at it!",
+    "price": 11,
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/11.png"],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/11.png"
+},
+{
+    "id": 123,
+    "title": "Wooden Duck play push toy",
+    "price": 10,
+    "description": "Your kid will love this thing. Just look at it!",
+    "price": 11,
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/12.png"],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/12.png"
+},
+
+{
+    "id": 123,
+    "title": "Gator Xylophone",
+    "price": 13,
+    "description": "Your kid could be the next ringo starr! Give him this gator xylophone and find out",
+    "price": 11,
+    "seller": {
+        "id": 123,
+        "name": "richard"
+    },
+    "location": "San Francisco",
+    "created": "2018-10-17T05:00:19",
+    "category": [1, 2],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/13.png"],
+    "thumbnail_url": "http://cribslist.herokuapp.com/images/13.png"
+},
+
+]

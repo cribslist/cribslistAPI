@@ -9,6 +9,9 @@
     "location": "San Francisco",
     "created": "2018-10-17T05:00:19",
     "category": [1, 2],
-    "photo_urls": ["1-a.png", "1-b.png", "1-c.png"],
+    "photo_urls": [
+        "http://cribslist.herokuapp.com/images/1-a.png",
+        "http://cribslist.herokuapp.com/images/1-b.png",
+        "http://cribslist.herokuapp.com/images/1-c.png"],
     "thumbnail_url": "1-a.png"
 }
