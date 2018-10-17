@@ -10,7 +10,7 @@ cd cribslistAPI
 npm i
 npm run start
 ```
-for local development run the following and visit localhost:5000/<path to fixture>
+for local development run the following and visit localhost:5000/path-to-fixture
 
 ```
 npm run dev
