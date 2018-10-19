@@ -1,0 +1,45 @@
+{
+  "id": 12345,
+  "name": "Sukwon Lee",
+  "email": "slee@hearsaycorp.com",
+  "location": "San Francisco",
+  "description": "My son is 18 months old.",
+  "rating": 9.8,
+  "user_photo_url": "https://cribslist.herokuapp.com/images/sukwon.png",
+  "items": [
+    {
+      "id": 123,
+      "title": "Wooden Duck play push toy",
+      "description": "Your kid will love this thing. Just look at it!",
+      "price": 10,
+      "seller": 222,
+      "location": "San Francisco",
+      "created": "2018-10-17T05:00:19",
+      "category": [
+        1,
+        2
+      ],
+      "photo_urls": [
+        "http://cribslist.herokuapp.com/images/12.png"
+      ],
+      "thumbnail_url": "http://cribslist.herokuapp.com/images/12.png"
+    },
+    {
+      "id": 123,
+      "title": "Gator Xylophone",
+      "description": "Your kid could be the next ringo starr! Give him this gator xylophone and find out",
+      "price": 13,
+      "seller": 222,
+      "location": "San Francisco",
+      "created": "2018-10-17T05:00:19",
+      "category": [
+        1,
+        2
+      ],
+      "photo_urls": [
+        "http://cribslist.herokuapp.com/images/13.png"
+      ],
+      "thumbnail_url": "http://cribslist.herokuapp.com/images/13.png"
+    }
+  ]
+}
