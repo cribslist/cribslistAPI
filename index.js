@@ -20,6 +20,7 @@ express()
     .use(busboy())
     .get('/item/:itemId', (req, res) => Item.find({ id: req.params.itemId }, (err, items) => res.json(items)))
     .get('/items', (req, res) => Item.find((err, items) => res.json(items)))
+    .get('/my_items/:itemId', (req, res) => Item.find({ seller: req.params.itemId }, (err, items) => res.json(items)))
     .post('/items', (req, res) => {
         try {
             const item = new Item(req.body);
@@ -53,6 +54,7 @@ express()
     })
     .get('/image/:id', (req, res) => ImageFile.findById(req.params.id, (err, img) => res.json(img)))
     .get('/account', (req, res) => res.json(account))
+    .get('/accounts', (req, res) => User.find((err, users) => res.json(users)))
     .get('/account/:id', (req, res) => User.find({ id: req.params.id }, (err, account) => res.json(account)))
     .delete('/image/:id', (req, res) =>
         ImageFile.findById(req.params.id, (err, img) => {
