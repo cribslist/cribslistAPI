@@ -15,12 +15,42 @@ mongoose.connect(mongoURL, function(error) {
     else console.log('mongo connected');
 });
 
+const paginationParams = req => {
+    const ITEM_COUNT_LIMIT = 90;
+    const count = Math.min(Math.max(req.param('count'), 1), ITEM_COUNT_LIMIT);
+    return {
+        limit: count,
+        skip: Math.max(0, req.param('page')) * count
+    };
+};
+
+const sortByParams = req => {
+    // todo; add logic here
+    return {
+
+    }
+}
+
 express()
     .use('/', express.static(__dirname + '/public'))
     .use(busboy())
     .get('/item/:itemId', (req, res) => Item.find({ id: req.params.itemId }, (err, items) => res.json(items)))
-    .get('/items', (req, res) => Item.find((err, items) => res.json(items)))
-    .get('/my_items/:itemId', (req, res) => Item.find({ seller: req.params.itemId }, (err, items) => res.json(items)))
+    .get('/items', (req, res) => {
+        const { skip, limit } = paginationParams(req);
+        Item.find().limit(limit).skip(skip).exec((err, items) => res.json(items));
+    })
+    .get('/search', (req, res)=>{
+        const { skip, limit } = paginationParams(req);
+        const {sortBy } = sortByParams(req);
+        Item.find({$text: {$search: searchString}})
+            .skip(skip)
+            .limit(limit)
+            .sort(sortByParams)
+            .exec((err, items) => res.json(items))
+    })
+    .get('/my_items/:itemId', (req, res) =>
+        Item.find({ seller: req.params.itemId }, (err, items) => res.json(items))
+    )
     .post('/items', (req, res) => {
         try {
             const item = new Item(req.body);

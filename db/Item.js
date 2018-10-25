@@ -16,4 +16,6 @@ const Schema = new mongoose.Schema({
     thumbnail_url: String
 });
 
+Schema.index({title: 'text', description: 'text'})
+
 module.exports = mongoose.model('Item', Schema);
