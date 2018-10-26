@@ -56,7 +56,7 @@ express()
     .post('/image_upload', (req, res) => {
         var fstream;
         req.pipe(req.busboy);
-        req.busboy.on('image', (fieldname, file, filename) => {
+        req.busboy.on('file', (fieldname, file, filename) => {
             const extension = filename.split('.')[1];
             if (!['png', 'jpg', 'gif', 'jpeg'].some(ext => ext === extension)) {
                 return res.status(400).send({ error: 'invalid type' });

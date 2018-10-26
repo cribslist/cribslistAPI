@@ -21,7 +21,7 @@
 
     function handleFiles() {
         var formData = new FormData();
-        formData.append('image', inputElement.files[0]);
+        formData.append('file', inputElement.files[0]);
         var urlAPI = 'image_upload';
         axios.post(urlAPI, formData, {
             headers: {
