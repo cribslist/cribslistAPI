@@ -53,19 +53,10 @@ express()
             .limit(limit)
             .exec((err, items) => res.json(items));
     })
-    .post('/items', (req, res) => {
-        try {
-            const item = new Item(req.body);
-            item.id = Date.now();
-        } catch (e) {
-            res.status(400).send({ error: 'invalid data' });
-        }
-        item.save(err => res.json(200, item));
-    })
     .post('/image_upload', (req, res) => {
         var fstream;
         req.pipe(req.busboy);
-        req.busboy.on('file', (fieldname, file, filename) => {
+        req.busboy.on('images', (fieldname, file, filename) => {
             const extension = filename.split('.')[1];
             if (!['png', 'jpg', 'gif', 'jpeg'].some(ext => ext === extension)) {
                 return res.status(400).send({ error: 'invalid type' });
@@ -83,6 +74,15 @@ express()
                 res.json(imgFile);
             });
         });
+    })
+    .post('/items', (req, res) => {
+        try {
+            const item = new Item(req.body);
+            item.id = Date.now();
+        } catch (e) {
+            res.status(400).send({ error: 'invalid data' });
+        }
+        item.save(err => res.json(200, item));
     })
     .get('/image/:id', (req, res) => ImageFile.findById(req.params.id, (err, img) => res.json(img)))
     .get('/account', (req, res) => res.json(account))
