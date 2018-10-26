@@ -26,10 +26,8 @@ const paginationParams = req => {
 
 const sortByParams = req => {
     // todo; add logic here
-    return {
-
-    }
-}
+    return {};
+};
 
 express()
     .use('/', express.static(__dirname + '/public'))
@@ -39,18 +37,22 @@ express()
         const { skip, limit } = paginationParams(req);
         Item.find().limit(limit).skip(skip).exec((err, items) => res.json(items));
     })
-    .get('/search', (req, res)=>{
+    .get('/search', (req, res) => {
         const { skip, limit } = paginationParams(req);
-        const {sortBy } = sortByParams(req);
-        Item.find({$text: {$search: searchString}})
+        const { sortBy } = sortByParams(req);
+        Item.find({ $text: { $search: searchString } })
             .skip(skip)
             .limit(limit)
             .sort(sortByParams)
-            .exec((err, items) => res.json(items))
+            .exec((err, items) => res.json(items));
     })
-    .get('/my_items/:itemId', (req, res) =>
-        Item.find({ seller: req.params.itemId }, (err, items) => res.json(items))
-    )
+    .get('/my_items/:itemId', (req, res) => {
+        const { skip, limit } = paginationParams(req);
+        Item.find({ seller: req.params.itemId })
+            .skip(skip)
+            .limit(limit)
+            .exec((err, items) => res.json(items));
+    })
     .post('/items', (req, res) => {
         try {
             const item = new Item(req.body);
@@ -63,7 +65,7 @@ express()
     .post('/image_upload', (req, res) => {
         var fstream;
         req.pipe(req.busboy);
-        req.busboy.on('file', (fieldname, file, filename) => {
+        req.busboy.on('image', (fieldname, file, filename) => {
             const extension = filename.split('.')[1];
             if (!['png', 'jpg', 'gif', 'jpeg'].some(ext => ext === extension)) {
                 return res.status(400).send({ error: 'invalid type' });
