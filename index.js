@@ -3,24 +3,26 @@ const path = require('path');
 const PORT = process.env.PORT || 5000;
 const config = require('./config');
 const fs = require('fs');
+var multer = require('multer');
+var upload = multer();
 const busboy = require('connect-busboy');
+const jsonItems = require('./public/items.json');
+const bodyParser = require('body-parser');
 
 const account = require('./public/account.json');
 const { ImageFile, Item, User } = require('./db');
 
 const mongoose = require('mongoose');
 const mongoURL = process.env.MONGOLAB_URI || config.MONGODB_URI;
-mongoose.connect(mongoURL, function(error) {
-    if (error) console.error(error);
-    else console.log('mongo connected');
-});
+mongoose.set('useCreateIndex', true)
+mongoose.connect(mongoURL,  { useNewUrlParser: true });
 
-const paginationParams = req => {
+const paginationParams = ({ count, page }) => {
     const ITEM_COUNT_LIMIT = 90;
-    const count = Math.min(Math.max(req.param('count'), 1), ITEM_COUNT_LIMIT);
+    const limit = Math.min(Math.max(count, 1), ITEM_COUNT_LIMIT);
     return {
-        limit: count,
-        skip: Math.max(0, req.param('page')) * count
+        limit,
+        skip: Math.max(0, page) * limit
     };
 };
 
@@ -32,22 +34,28 @@ const sortByParams = req => {
 express()
     .use('/', express.static(__dirname + '/public'))
     .use(busboy())
+    .use(bodyParser.json())
+    .use(upload.array())
+    .use(bodyParser.urlencoded({ extended: true }))
     .get('/item/:itemId', (req, res) => Item.find({ id: req.params.itemId }, (err, items) => res.json(items)))
     .get('/items', (req, res) => {
-        const { skip, limit } = paginationParams(req);
-        Item.find().limit(limit).skip(skip).exec((err, items) => res.json(items));
-    })
-    .get('/search', (req, res) => {
-        const { skip, limit } = paginationParams(req);
-        const { sortBy } = sortByParams(req);
-        Item.find({ $text: { $search: searchString } })
-            .skip(skip)
-            .limit(limit)
-            .sort(sortByParams)
-            .exec((err, items) => res.json(items));
+        const { skip, limit } = paginationParams(req.query);
+        const { query } = req.query;
+        if(!query || !query.trim()){
+            Item.find().limit(limit)
+                .skip(skip)
+                .exec((err, items) => res.json(items));
+                return;
+        }
+
+            Item.find({ $text: { $search: query } })
+                .limit(limit)
+                .skip(skip)
+                .exec((err, items) => res.json(items));
+            return;
     })
     .get('/my_items/:itemId', (req, res) => {
-        const { skip, limit } = paginationParams(req);
+        const { skip, limit } = paginationParams(req.query);
         Item.find({ seller: req.params.itemId })
             .skip(skip)
             .limit(limit)
@@ -58,9 +66,6 @@ express()
         req.pipe(req.busboy);
         req.busboy.on('file', (fieldname, file, filename) => {
             const extension = filename.split('.')[1];
-            if (!['png', 'jpg', 'gif', 'jpeg'].some(ext => ext === extension)) {
-                return res.status(400).send({ error: 'invalid type' });
-            }
             const imgPath = `/images/img-${Date.now()}.${extension}`;
             console.log('Uploading: ' + filename);
             fstream = fs.createWriteStream(__dirname + '/public/' + imgPath);
@@ -76,13 +81,21 @@ express()
         });
     })
     .post('/items', (req, res) => {
+        const {body} = req;
+        if(!body){
+            res.status(400).send({ error: 'no data sent' });
+        }
         try {
-            const item = new Item(req.body);
+            const {photo_urls, categories} = body;
+            body.photo_urls = photo_urls ? JSON.parse(photo_urls) : [];
+            body.categories = categories ? JSON.parse(categories) : [];
+            const item = new Item(body);
+            console.log(item, req.body, "<-----")
             item.id = Date.now();
+            item.save(err => res.json(item));
         } catch (e) {
             res.status(400).send({ error: 'invalid data' });
         }
-        item.save(err => res.json(200, item));
     })
     .get('/image/:id', (req, res) => ImageFile.findById(req.params.id, (err, img) => res.json(img)))
     .get('/account', (req, res) => res.json(account))
@@ -97,3 +110,5 @@ express()
     )
     .get('/image_files', (req, res) => ImageFile.find((err, imgs) => res.json(imgs)))
     .listen(PORT, () => console.log(`Listening on ${PORT}`));
+//new aloha baby party shirt
+    //This item is in like new condition. Bought it on a recent trip to hawaii. It is machine wash safe and was only used once. 35 obo

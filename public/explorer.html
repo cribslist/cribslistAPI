@@ -34,9 +34,19 @@
 </head>
 <body>
     <input id="uploader" type="file"/>
+    <div>
+        <label>input<input type="text" id="title"></label>
+        <label>description<input type="text" id="description" /></label>
+        <label>price<input type="text" id="price" /></label>
+        <label>location<input type="text" id="location" /></label>
+        <label>image_url<input type="text" id="image_url" /></label>
+        <button id="submit">submit</button>
+    </div>
     <ul id="image_list">
     </ul>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" ></script>
     <script src="/uploader.js"></script>
+
+
 </body>
 </html>
