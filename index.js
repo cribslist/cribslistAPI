@@ -44,6 +44,9 @@ const isParseableField = name => {
 };
 
 express()
+    .use(bodyParser.json())
+    .use(upload.array())
+    .use(bodyParser.urlencoded({ extended: true }))
     .use('/', express.static(__dirname + '/public'))
     .get('/item/:itemId', (req, res) => Item.find({ id: req.params.itemId }, (err, items) => res.json(items)))
     .get('/items', (req, res) => {
