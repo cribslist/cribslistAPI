@@ -65,7 +65,10 @@
             data: formData,
             config: { headers: { 'Content-Type': 'multipart/form-data' } }
         }).then(function(response) {
-            debugger;
+           Array.prototype.forEach.call(document.getElementsByTagName('input'), function(input){
+                input.value = "";
+           });
+           alert("Great success!")
         });
     });
 })();
