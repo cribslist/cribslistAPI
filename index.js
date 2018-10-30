@@ -94,7 +94,7 @@ express()
         });
         req.busboy.on('finish', function() {
             if (Object.keys(itemData)) {
-                const item = new Item(body);
+                const item = new Item(itemData);
                 console.log(item, req.body, '<-----');
                 item.id = Date.now();
                 item.save(err => res.json(item));
