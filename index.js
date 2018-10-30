@@ -6,6 +6,15 @@ const fs = require('fs');
 const busboy = require('connect-busboy');
 const jsonItems = require('./public/items.json');
 const bodyParser = require('body-parser');
+var multer = require('multer');
+// var storage = multer.diskStorage({
+//    destination: function (req, file, cb) {
+//     cb(null, './public/images/')
+//    },
+//    filename: function (req, file, cb) {
+//      cb(null, Date.now() + path.extname(file.originalname))
+//   } });
+var upload = multer();
 
 const account = require('./public/account.json');
 const { ImageFile, Item, User } = require('./db');
@@ -36,9 +45,6 @@ const isParseableField = name => {
 
 express()
     .use('/', express.static(__dirname + '/public'))
-    .use(bodyParser.json())
-    .use(bodyParser.urlencoded({ extended: true }))
-    .use(busboy())
     .get('/item/:itemId', (req, res) => Item.find({ id: req.params.itemId }, (err, items) => res.json(items)))
     .get('/items', (req, res) => {
         const { skip, limit } = paginationParams(req.query);
@@ -61,76 +67,60 @@ express()
             .limit(limit)
             .exec((err, items) => res.json(items));
     })
-    .post('/image_upload', (req, res) => {
-        var fstream;
-        req.pipe(req.busboy);
-        req.busboy.on('file', (fieldname, file, filename) => {
-            const extension = filename.split('.')[1];
-            if (!['png', 'jpg', 'gif', 'jpeg'].some(ext => ext === extension)) {
-                return res.status(400).send({ error: 'invalid type' });
-            }
-            const imgPath = `/images/img-${Date.now()}.${extension}`;
-            console.log('Uploading: ' + filename);
-            fstream = fs.createWriteStream(__dirname + '/public/' + imgPath);
-            file.pipe(fstream);
-            fstream.on('close', () => {
-                const imgFile = new ImageFile({
-                    path: 'http://cribslist.herokuapp.com' + imgPath,
-                    size: file.size
-                });
-                imgFile.save();
-                res.json(imgFile);
+    .post('/image_upload', upload.single('file'), (req, res) => {
+        const { file } = req;
+        const extension = file.originalname.split('.')[1];
+        const imgPath = `/images/img-${Date.now()}.${extension}`;
+        if(!/image./i.test(file.mimetype)){
+            return res.status(400).send({ error: 'invalid type' });
+        }
+        console.log('Uploading: ' + file.originalname);
+        fs.writeFile('./public/' + imgPath, file.buffer, function(err){
+            if (err) throw err
+           const imgFile = new ImageFile({
+                path: 'http://cribslist.herokuapp.com' + imgPath,
+                size: file.size
             });
-        });
+            imgFile.save();
+            res.json(imgFile);
+        })
     })
-    .post('/items', (req, res) => {
-        if (req.busboy) {
-            const itemData = {};
-            let invalid = false;
-            req.busboy.on('field', function(
-                fieldname,
-                val,
-                fieldnameTruncated,
-                valTruncated,
-                encoding,
-                mimetype
-            ) {
-                if (Item.VALID_FIELDS.hasOwnProperty(fieldname) && val) {
-                    try {
-                        itemData[fieldname] = isParseableField(fieldname) ? JSON.parse(val) : val;
-                    } catch (e) {
-                        console.error('this value did not parse: ', val);
-                    }
-
-                    return;
+    .post('/items', upload.none(), (req, res) => {
+        const { body } = req;
+        if (!body) {
+            res.status(400).send({ error: 'no data sent' });
+        }
+        const itemData = Object.keys(body).reduce((acc, fieldname) => {
+            const val = body[fieldname];
+            if (Item.VALID_FIELDS.hasOwnProperty(fieldname) && val) {
+                try {
+                    acc[fieldname] = isParseableField(fieldname) ? JSON.parse(val) : val;
+                } catch (e) {
+                    console.error('value did not parse: ' + fieldname, val);
                 }
-                invalid = true;
-            });
-            req.busboy.on('finish', function() {
-                if (Object.keys(itemData) && !invalid) {
-                    const item = new Item(itemData);
-                    item.id = Date.now();
-                    if (!itemData.thumbnail_url) {
-                        item.thumbnail_url =
-                            item.photo_urls[0] ||
-                            'http://cribslist.herokuapp.com/images/img-1540871053357.jpg';
-                    }
-                    if (!itemData.seller) {
-                        item.seller = (Date.now() + '').slice(-4);
-                    }
-                    item.created = new Date().toISOString().split('.')[0];
+            }
+            return acc;
+        }, {});
 
-                    if (!itemData.category) {
-                        item.category = [];
-                    }
-                    console.log(item);
-                    item.save(err => res.json(item));
-                } else {
-                    const error = invalid ? 'bad data sent' : 'no data sent';
-                    res.status(400).send({ error });
-                }
-            });
-            req.pipe(busboy);
+        const item = new Item(itemData);
+        item.id = Date.now();
+        if (!itemData.thumbnail_url) {
+            item.thumbnail_url =
+                item.photo_urls[0] || 'http://cribslist.herokuapp.com/images/img-1540871053357.jpg';
+        }
+        if (!itemData.seller) {
+            item.seller = (Date.now() + '').slice(-4);
+        }
+        item.created = new Date().toISOString().split('.')[0];
+
+        if (!itemData.category) {
+            item.category = [];
+        }
+        console.log(item);
+        item.save(err => res.json(item));
+
+        if (!Object.keys(itemData).length) {
+            res.status(400).send({ error: 'no parseable values' });
         }
     })
     .get('/image/:id', (req, res) => ImageFile.findById(req.params.id, (err, img) => res.json(img)))
