@@ -29,6 +29,11 @@ const sortByParams = req => {
     return {};
 };
 
+const isParseableField = (name)=> {
+    const fields = {photo_urls: true, category: true}
+    return fields[name];
+};
+
 express()
     .use('/', express.static(__dirname + '/public'))
     .use(bodyParser.json())
@@ -88,7 +93,12 @@ express()
             mimetype
         ) {
             if (Item.VALID_FIELDS.hasOwnProperty(fieldname) && val) {
-                itemData[fieldname] = val;
+                try {
+                    itemData[fieldname] = isParseableField(fieldname) ? JSON.parse(val) : val;
+                } catch(e){
+                    console.error('this value did not parse: ', val)
+                }
+
                 return;
             }
             invalid = true;
@@ -109,7 +119,7 @@ express()
                 if(!itemData.category){
                     item.category = [];
                 }
-
+                console.log(item)
                 item.save(err => res.json(item));
             } else {
                 const error = invalid ? "bad data sent" : "no data sent";
@@ -130,5 +140,3 @@ express()
     )
     .get('/image_files', (req, res) => ImageFile.find((err, imgs) => res.json(imgs)))
     .listen(PORT, () => console.log(`Listening on ${PORT}`));
-//new aloha baby party shirt
-//This item is in like new condition. Bought it on a recent trip to hawaii. It is machine wash safe and was only used once. 35 obo
