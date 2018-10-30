@@ -67,7 +67,7 @@ express()
             file.pipe(fstream);
             fstream.on('close', () => {
                 const imgFile = new ImageFile({
-                    path: "http://cribslist.herokuapp.com/" + imgPath,
+                    path: "http://cribslist.herokuapp.com" + imgPath,
                     size: file.size
                 });
                 imgFile.save();
