@@ -67,7 +67,7 @@ express()
             file.pipe(fstream);
             fstream.on('close', () => {
                 const imgFile = new ImageFile({
-                    path: imgPath,
+                    path: "http://cribslist.herokuapp.com/" + imgPath,
                     size: file.size
                 });
                 imgFile.save();
@@ -78,6 +78,7 @@ express()
     .post('/items', (req, res) => {
         req.pipe(req.busboy);
         const itemData = {};
+        let invalid = false;
         req.busboy.on('field', function(
             fieldname,
             val,
@@ -90,16 +91,29 @@ express()
                 itemData[fieldname] = val;
                 return;
             }
-            res.status(400).send({ error: 'invalid data' });
+            invalid = true;
+
         });
         req.busboy.on('finish', function() {
-            if (Object.keys(itemData)) {
+            if (Object.keys(itemData) && !invalid) {
                 const item = new Item(itemData);
-                console.log(item, req.body, '<-----');
                 item.id = Date.now();
+                if(!itemData.thumbnail_url){
+                    item.thumbnail_url = item.photo_urls[0] || "http://cribslist.herokuapp.com/images/img-1540871053357.jpg"
+                }
+                if(!itemData.seller){
+                    item.seller = (Date.now() + "").slice(-4);
+                }
+                item.created = new Date().toISOString().split('.')[0];
+
+                if(!itemData.category){
+                    item.category = [];
+                }
+
                 item.save(err => res.json(item));
             } else {
-                res.status(400).send({ error: 'no data sent' });
+                const error = invalid ? "bad data sent" : "no data sent";
+                res.status(400).send({ error });
             }
         });
     })
