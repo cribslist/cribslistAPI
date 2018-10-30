@@ -73,19 +73,19 @@ express()
         const { file } = req;
         const extension = file.originalname.split('.')[1];
         const imgPath = `/images/img-${Date.now()}.${extension}`;
-        if(!/image./i.test(file.mimetype)){
+        if (!/image./i.test(file.mimetype)) {
             return res.status(400).send({ error: 'invalid type' });
         }
         console.log('Uploading: ' + file.originalname);
-        fs.writeFile('./public/' + imgPath, file.buffer, function(err){
-            if (err) throw err
-           const imgFile = new ImageFile({
+        fs.writeFile('./public/' + imgPath, file.buffer, function(err) {
+            if (err) throw err;
+            const imgFile = new ImageFile({
                 path: 'http://cribslist.herokuapp.com' + imgPath,
                 size: file.size
             });
             imgFile.save();
             res.json(imgFile);
-        })
+        });
     })
     .post('/items', upload.none(), (req, res) => {
         const { body } = req;
@@ -104,6 +104,11 @@ express()
             return acc;
         }, {});
 
+        if (!Object.keys(itemData).length) {
+            res.status(400).send({ error: 'no parseable values' });
+            return;
+        }
+
         const item = new Item(itemData);
         item.id = Date.now();
         if (!itemData.thumbnail_url) {
@@ -120,10 +125,6 @@ express()
         }
         console.log(item);
         item.save(err => res.json(item));
-
-        if (!Object.keys(itemData).length) {
-            res.status(400).send({ error: 'no parseable values' });
-        }
     })
     .get('/image/:id', (req, res) => ImageFile.findById(req.params.id, (err, img) => res.json(img)))
     .get('/account', (req, res) => res.json(account))
