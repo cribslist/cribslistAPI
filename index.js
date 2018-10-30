@@ -29,8 +29,8 @@ const sortByParams = req => {
     return {};
 };
 
-const isParseableField = (name)=> {
-    const fields = {photo_urls: true, category: true}
+const isParseableField = name => {
+    const fields = { photo_urls: true, category: true };
     return fields[name];
 };
 
@@ -75,7 +75,7 @@ express()
             file.pipe(fstream);
             fstream.on('close', () => {
                 const imgFile = new ImageFile({
-                    path: "http://cribslist.herokuapp.com" + imgPath,
+                    path: 'http://cribslist.herokuapp.com' + imgPath,
                     size: file.size
                 });
                 imgFile.save();
@@ -84,51 +84,54 @@ express()
         });
     })
     .post('/items', (req, res) => {
-        req.pipe(req.busboy);
-        const itemData = {};
-        let invalid = false;
-        req.busboy.on('field', function(
-            fieldname,
-            val,
-            fieldnameTruncated,
-            valTruncated,
-            encoding,
-            mimetype
-        ) {
-            if (Item.VALID_FIELDS.hasOwnProperty(fieldname) && val) {
-                try {
-                    itemData[fieldname] = isParseableField(fieldname) ? JSON.parse(val) : val;
-                } catch(e){
-                    console.error('this value did not parse: ', val)
-                }
+        if (req.busboy) {
+            const itemData = {};
+            let invalid = false;
+            req.busboy.on('field', function(
+                fieldname,
+                val,
+                fieldnameTruncated,
+                valTruncated,
+                encoding,
+                mimetype
+            ) {
+                if (Item.VALID_FIELDS.hasOwnProperty(fieldname) && val) {
+                    try {
+                        itemData[fieldname] = isParseableField(fieldname) ? JSON.parse(val) : val;
+                    } catch (e) {
+                        console.error('this value did not parse: ', val);
+                    }
 
-                return;
-            }
-            invalid = true;
+                    return;
+                }
+                invalid = true;
+            });
+            req.busboy.on('finish', function() {
+                if (Object.keys(itemData) && !invalid) {
+                    const item = new Item(itemData);
+                    item.id = Date.now();
+                    if (!itemData.thumbnail_url) {
+                        item.thumbnail_url =
+                            item.photo_urls[0] ||
+                            'http://cribslist.herokuapp.com/images/img-1540871053357.jpg';
+                    }
+                    if (!itemData.seller) {
+                        item.seller = (Date.now() + '').slice(-4);
+                    }
+                    item.created = new Date().toISOString().split('.')[0];
 
-        });
-        req.busboy.on('finish', function() {
-            if (Object.keys(itemData) && !invalid) {
-                const item = new Item(itemData);
-                item.id = Date.now();
-                if(!itemData.thumbnail_url){
-                    item.thumbnail_url = item.photo_urls[0] || "http://cribslist.herokuapp.com/images/img-1540871053357.jpg"
+                    if (!itemData.category) {
+                        item.category = [];
+                    }
+                    console.log(item);
+                    item.save(err => res.json(item));
+                } else {
+                    const error = invalid ? 'bad data sent' : 'no data sent';
+                    res.status(400).send({ error });
                 }
-                if(!itemData.seller){
-                    item.seller = (Date.now() + "").slice(-4);
-                }
-                item.created = new Date().toISOString().split('.')[0];
-
-                if(!itemData.category){
-                    item.category = [];
-                }
-                console.log(item)
-                item.save(err => res.json(item));
-            } else {
-                const error = invalid ? "bad data sent" : "no data sent";
-                res.status(400).send({ error });
-            }
-        });
+            });
+            req.pipe(busboy);
+        }
     })
     .get('/image/:id', (req, res) => ImageFile.findById(req.params.id, (err, img) => res.json(img)))
     .get('/account', (req, res) => res.json(account))
