@@ -3,8 +3,6 @@ const path = require('path');
 const PORT = process.env.PORT || 5000;
 const config = require('./config');
 const fs = require('fs');
-var multer = require('multer');
-var upload = multer();
 const busboy = require('connect-busboy');
 const jsonItems = require('./public/items.json');
 const bodyParser = require('body-parser');
@@ -14,8 +12,8 @@ const { ImageFile, Item, User } = require('./db');
 
 const mongoose = require('mongoose');
 const mongoURL = process.env.MONGOLAB_URI || config.MONGODB_URI;
-mongoose.set('useCreateIndex', true)
-mongoose.connect(mongoURL,  { useNewUrlParser: true });
+mongoose.set('useCreateIndex', true);
+mongoose.connect(mongoURL, { useNewUrlParser: true });
 
 const paginationParams = ({ count, page }) => {
     const ITEM_COUNT_LIMIT = 90;
@@ -33,26 +31,23 @@ const sortByParams = req => {
 
 express()
     .use('/', express.static(__dirname + '/public'))
-    .use(busboy())
     .use(bodyParser.json())
-    .use(upload.array())
     .use(bodyParser.urlencoded({ extended: true }))
+    .use(busboy())
     .get('/item/:itemId', (req, res) => Item.find({ id: req.params.itemId }, (err, items) => res.json(items)))
     .get('/items', (req, res) => {
         const { skip, limit } = paginationParams(req.query);
         const { query } = req.query;
-        if(!query || !query.trim()){
-            Item.find().limit(limit)
-                .skip(skip)
-                .exec((err, items) => res.json(items));
-                return;
+        if (!query || !query.trim()) {
+            Item.find().limit(limit).skip(skip).exec((err, items) => res.json(items));
+            return;
         }
 
-            Item.find({ $text: { $search: query } })
-                .limit(limit)
-                .skip(skip)
-                .exec((err, items) => res.json(items));
-            return;
+        Item.find({ $text: { $search: query } })
+            .limit(limit)
+            .skip(skip)
+            .exec((err, items) => res.json(items));
+        return;
     })
     .get('/my_items/:itemId', (req, res) => {
         const { skip, limit } = paginationParams(req.query);
@@ -81,21 +76,32 @@ express()
         });
     })
     .post('/items', (req, res) => {
-        const {body} = req;
-        if(!body){
-            res.status(400).send({ error: 'no data sent' });
-        }
-        try {
-            const {photo_urls, categories} = body;
-            body.photo_urls = photo_urls ? JSON.parse(photo_urls) : [];
-            body.categories = categories ? JSON.parse(categories) : [];
-            const item = new Item(body);
-            console.log(item, req.body, "<-----")
-            item.id = Date.now();
-            item.save(err => res.json(item));
-        } catch (e) {
+        req.pipe(req.busboy);
+        const itemData = {};
+        req.busboy.on('field', function(
+            fieldname,
+            val,
+            fieldnameTruncated,
+            valTruncated,
+            encoding,
+            mimetype
+        ) {
+            if (Item.VALID_FIELDS.hasOwnProperty(fieldname) && val) {
+                itemData[fieldname] = val;
+                return;
+            }
             res.status(400).send({ error: 'invalid data' });
-        }
+        });
+        req.busboy.on('finish', function() {
+            if (Object.keys(itemData)) {
+                const item = new Item(body);
+                console.log(item, req.body, '<-----');
+                item.id = Date.now();
+                item.save(err => res.json(item));
+            } else {
+                res.status(400).send({ error: 'no data sent' });
+            }
+        });
     })
     .get('/image/:id', (req, res) => ImageFile.findById(req.params.id, (err, img) => res.json(img)))
     .get('/account', (req, res) => res.json(account))
@@ -111,4 +117,4 @@ express()
     .get('/image_files', (req, res) => ImageFile.find((err, imgs) => res.json(imgs)))
     .listen(PORT, () => console.log(`Listening on ${PORT}`));
 //new aloha baby party shirt
-    //This item is in like new condition. Bought it on a recent trip to hawaii. It is machine wash safe and was only used once. 35 obo
+//This item is in like new condition. Bought it on a recent trip to hawaii. It is machine wash safe and was only used once. 35 obo

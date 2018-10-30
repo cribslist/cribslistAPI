@@ -16,6 +16,23 @@ const Schema = new mongoose.Schema({
     thumbnail_url: String
 });
 
+
+
 Schema.index({title: 'text', description: 'text'})
 
-module.exports = mongoose.model('Item', Schema);
+const Item =  mongoose.model('Item', Schema)
+Item.VALID_FIELDS = {
+    id: Number,
+    title: String,
+    price: Number,
+    description: String,
+    seller: Number,
+    location: String,
+    latitude: Number,
+    longitude: Number,
+    created: String,
+    category: Array,
+    photo_urls: Array,
+    thumbnail_url: String
+};
+module.exports = Item;
