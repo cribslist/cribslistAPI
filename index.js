@@ -73,6 +73,7 @@ express()
         const { file } = req;
         const extension = file.originalname.split('.')[1];
         const imgPath = `/images/img-${Date.now()}.${extension}`;
+        console.log(file.mimetype, file, ' this is the file and mimetype')
         if (!/image./i.test(file.mimetype)) {
             return res.status(400).send({ error: 'invalid type' });
         }
