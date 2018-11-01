@@ -7,17 +7,10 @@ const busboy = require('connect-busboy');
 const jsonItems = require('./public/items.json');
 const bodyParser = require('body-parser');
 var multer = require('multer');
-// var storage = multer.diskStorage({
-//    destination: function (req, file, cb) {
-//     cb(null, './public/images/')
-//    },
-//    filename: function (req, file, cb) {
-//      cb(null, Date.now() + path.extname(file.originalname))
-//   } });
 var upload = multer();
 
 const account = require('./public/account.json');
-const { ImageFile, Item, User } = require('./db');
+const { ImageFile, Item, User, Comment } = require('./db');
 
 const mongoose = require('mongoose');
 const mongoURL = process.env.MONGOLAB_URI || config.MONGODB_URI;
@@ -73,7 +66,7 @@ express()
         const { file } = req;
         const extension = file.originalname.split('.')[1];
         const imgPath = `/images/img-${Date.now()}.${extension}`;
-        console.log(file.mimetype, file, ' this is the file and mimetype')
+        console.log(file.mimetype, file, ' this is the file and mimetype');
         if (!/image./i.test(file.mimetype)) {
             return res.status(400).send({ error: 'invalid type' });
         }
@@ -131,6 +124,40 @@ express()
     .get('/account', (req, res) => res.json(account))
     .get('/accounts', (req, res) => User.find((err, users) => res.json(users)))
     .get('/account/:id', (req, res) => User.find({ id: req.params.id }, (err, account) => res.json(account)))
+    .get('/comments/:id', (req, res)=> Comment.find({ thread_id: req.params.id }, (err, comment) => res.json(comment)))
+    .post('/comments/:id', (req, res)=>{
+        const { query } = req;
+        const comment = Object.keys(query).reduce((acc, param) => {
+            if (Comment.VALID_PARAMS.hasOwnProperty(param)) {
+                acc[param] = query[param];
+            } else {
+                console.log('invalid param not being added ', param, query[param]);
+            }
+            return acc;
+        }, {});
+        if(!Object.keys(comment).length){
+            const errMsg = "no valid params to add"
+            console.log(errMsg)
+            return res.status(400).send({ error: 'no convo found' });
+        }
+        const newComment = new Comment(comment);
+        newComment.thread_id = req.params.id;
+        newComment.save();
+        console.log('saving comment', comment);
+        res.json(newComment);
+
+    })
+    .delete('/comments/:id', (req, res)=>{
+        const { id } = req.params;
+        Comment
+            .findByIdAndRemove(id)
+            .exec(err=> {
+                if(err){
+                    return res.status(400).send({ error: 'something went wrong' });
+                }
+                res.json({ message: "great success" })
+            })
+    })
     .delete('/image/:id', (req, res) =>
         ImageFile.findById(req.params.id, (err, img) => {
             fs.unlink(img.path, () => {
