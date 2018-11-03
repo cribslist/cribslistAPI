@@ -11,7 +11,7 @@
         var remove = document.createElement('strong');
         remove.innerText = ' X ';
         remove.addEventListener('click', function() {
-            axios.delete(`image/${img._id}`);
+            axios.delete(`image/${img.public_id}`);
             base.removeChild(contain);
         });
         contain.append(remove);

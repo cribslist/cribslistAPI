@@ -6,8 +6,9 @@ const fs = require('fs');
 const busboy = require('connect-busboy');
 const jsonItems = require('./public/items.json');
 const bodyParser = require('body-parser');
-var multer = require('multer');
-var upload = multer();
+const multer = require('multer');
+const upload = multer();
+const cloudinary = require('cloudinary');
 
 const account = require('./public/account.json');
 const { ImageFile, Item, User, Comment } = require('./db');
@@ -25,6 +26,12 @@ const paginationParams = ({ count, page }) => {
         skip: Math.max(0, page) * limit
     };
 };
+
+cloudinary.config({
+    cloud_name: config.CN_NAME,
+    api_key: config.CN_API_KEY,
+    api_secret: config.CN_API_SECRET
+});
 
 const sortByParams = req => {
     // todo; add logic here
@@ -65,20 +72,29 @@ express()
     .post('/image_upload', upload.single('file'), (req, res) => {
         const { file } = req;
         const extension = file.originalname.split('.')[1];
-        const imgPath = `/images/img-${Date.now()}.${extension}`;
+        const public_id = Date.now();
+        const imgPath = `/images/img-${public_id}.${extension}`;
         console.log(file.mimetype, file, ' this is the file and mimetype');
         if (!/image./i.test(file.mimetype)) {
             return res.status(400).send({ error: 'invalid type' });
         }
         console.log('Uploading: ' + file.originalname);
-        fs.writeFile('./public/' + imgPath, file.buffer, function(err) {
+        const tempImgPath = './public/' + imgPath;
+        fs.writeFile(tempImgPath, file.buffer, function(err) {
             if (err) throw err;
-            const imgFile = new ImageFile({
-                path: 'http://cribslist.herokuapp.com' + imgPath,
-                size: file.size
+            cloudinary.v2.uploader.upload(tempImgPath, { public_id }, (error, result) => {
+                const imgFile = new ImageFile({
+                    path: result.url,
+                    size: result.bytes,
+                    public_id
+                });
+                imgFile.save();
+                console.log('image saved from: ', tempImgPath);
+                fs.unlink(tempImgPath, () => {
+                    console.log('deleting image');
+                    res.json(imgFile);
+                });
             });
-            imgFile.save();
-            res.json(imgFile);
         });
     })
     .post('/items', upload.none(), (req, res) => {
@@ -124,8 +140,20 @@ express()
     .get('/account', (req, res) => res.json(account))
     .get('/accounts', (req, res) => User.find((err, users) => res.json(users)))
     .get('/account/:id', (req, res) => User.find({ id: req.params.id }, (err, account) => res.json(account)))
-    .get('/comments/:id', (req, res)=> Comment.find({ thread_id: req.params.id }, (err, comment) => res.json(comment)))
-    .post('/comments/:id', (req, res)=>{
+    .get('/comments/:id', (req, res) =>
+        Comment.find({ thread_id: req.params.id }, (err, comment) => res.json(comment))
+    )
+    .get('/all_comments/', (req, res)=> Comment.find((err, comments)=> res.json(comments)))
+    .delete('/comments/:comment_id', (req, res)=>{
+        Comment.findByIdAndRemove(req.params.comment_id, (err)=>{
+            if(err){
+                return res.status(400).send({ error: 'no convo found' });
+            } else {
+                res.json({ message: 'great success' });
+            }
+        })
+    })
+    .post('/comments/:id', (req, res) => {
         const { query } = req;
         const comment = Object.keys(query).reduce((acc, param) => {
             if (Comment.VALID_PARAMS.hasOwnProperty(param)) {
@@ -135,9 +163,9 @@ express()
             }
             return acc;
         }, {});
-        if(!Object.keys(comment).length){
-            const errMsg = "no valid params to add"
-            console.log(errMsg)
+        if (!Object.keys(comment).length) {
+            const errMsg = 'no valid params to add';
+            console.log(errMsg);
             return res.status(400).send({ error: 'no convo found' });
         }
         const newComment = new Comment(comment);
@@ -145,25 +173,26 @@ express()
         newComment.save();
         console.log('saving comment', comment);
         res.json(newComment);
-
     })
-    .delete('/comments/:id', (req, res)=>{
+    .delete('/comments/:id', (req, res) => {
         const { id } = req.params;
-        Comment
-            .findByIdAndRemove(id)
-            .exec(err=> {
-                if(err){
-                    return res.status(400).send({ error: 'something went wrong' });
-                }
-                res.json({ message: "great success" })
-            })
+        Comment.findByIdAndRemove(id).exec(err => {
+            if (err) {
+                return res.status(400).send({ error: 'something went wrong' });
+            }
+            res.json({ message: 'great success' });
+        });
     })
-    .delete('/image/:id', (req, res) =>
-        ImageFile.findById(req.params.id, (err, img) => {
-            fs.unlink(img.path, () => {
-                ImageFile.deleteOne({ _id: req.params.id }, err => res.json({ msg: 'success' }));
-            });
-        })
-    )
+    .delete('/image/:id', (req, res) => {
+        const { id } = req.params;
+        ImageFile.find({ public_id: id }, (err, img) => {
+            if (!img || err) {
+                return res.status(400).send({ error: 'something went wrong' });
+            }
+            cloudinary.v2.uploader.destroy(id, (error, result) =>
+                ImageFile.deleteOne({ public_id: id }, err => res.json({ msg: 'success' }))
+            );
+        });
+    })
     .get('/image_files', (req, res) => ImageFile.find((err, imgs) => res.json(imgs)))
     .listen(PORT, () => console.log(`Listening on ${PORT}`));

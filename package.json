@@ -12,6 +12,7 @@
   "main": "index.js",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "cloudinary": "^1.11.0",
     "connect-busboy": "0.0.2",
     "express": "^4.15.2",
     "fs": "0.0.1-security",
